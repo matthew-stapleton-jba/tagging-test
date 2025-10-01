@@ -19,9 +19,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-      - name: Create and push tag
-        run: |
-          TAG="v$(date +'%Y%m%d%H%M%S')"
-          git tag "$TAG"
-          git push origin "$TAG"
+
+    - name: Create and push tag
+      run: |
+        TAG="v$(cat VERSION | tr -d '[:space:]')"
+        git tag "$TAG"
+        git push origin "$TAG"
