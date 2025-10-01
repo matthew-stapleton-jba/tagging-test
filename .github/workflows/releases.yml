@@ -1,4 +1,4 @@
-name: Tag on push
+name: Releases
 
 on:
   push:
@@ -39,3 +39,22 @@ jobs:
 
           git tag -a "$TAG" -m "Tag $TAG for ${GITHUB_REF_NAME}"
           git push origin "$TAG"
+
+            - name: Create release (main)
+        if: github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.vars.outputs.tag }}" \
+            --title "${{ steps.vars.outputs.tag }}" \
+            --generate-notes
+
+      - name: Create prerelease (dev)
+        if: github.ref_name == 'dev'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.vars.outputs.tag }}" \
+            --title "${{ steps.vars.outputs.tag }} (dev)" \
+            --prerelease \
+            --generate-notes
