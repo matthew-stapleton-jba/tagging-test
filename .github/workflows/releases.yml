@@ -21,6 +21,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Create Tag
+        id: vars
         run: |
           set -euo pipefail
 
@@ -39,6 +40,8 @@ jobs:
 
           git tag -a "$TAG" -m "Tag $TAG for ${GITHUB_REF_NAME}"
           git push origin "$TAG"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Create release (main)
         if: github.ref_name == 'main'
