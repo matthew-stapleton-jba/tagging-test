@@ -2,8 +2,7 @@ name: Tag on push
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, dev]
 
 permissions:
   contents: write
@@ -12,16 +11,31 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure Identity
-        run: |
-          git config user.name "github-actions[bot]"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Configure Identity 
+        run: | 
+          git config user.name "github-actions[bot]" 
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Create and push tag
+      - name: Create Tag
         run: |
-          TAG="v$(cat VERSION | tr -d '[:space:]')"
-          git tag "$TAG"
+          set -euo pipefail
+
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            TAG="v${VERSION}"
+          else
+            SHORTSHA="$(git rev-parse --short "$GITHUB_SHA")"
+            TAG="v${VERSION}-${SHORTSHA}"
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; failing."
+            exit 1
+          fi
+
+          git tag -a "$TAG" -m "Tag $TAG for ${GITHUB_REF_NAME}"
           git push origin "$TAG"

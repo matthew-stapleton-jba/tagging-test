@@ -1,0 +1,19 @@
+name: Release (dev)
+on:
+  push:
+    tags: ['v*-*']  # dev tags like v0.0.1-abcde
+permissions:
+  contents: write
+jobs:
+  prerelease:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG (dev)" \
+            --prerelease \
+            --generate-notes
